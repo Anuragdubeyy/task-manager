@@ -5,24 +5,24 @@ export const sidebarLinks = [
       href: "/",
       alternateHref: "/",
     },
-//     {
-//       id: 2,
-//       title: "Players",
-//       href: "/agents",
-//       alternateHref: "/add-users",
-//     },
+    {
+      id: 2,
+      title: "Players",
+      href: "/agents",
+      alternateHref: "/add-users",
+    },
 //     // {
 //     //   id: 3,
 //     //   title: "Add Players",
 //     //   href: "/add-users",
 //     //   alternateHref: "/add-users",
 //     // },
-//     {
-//       id: 3,
-//       title: "Income",
-//       href: "/incomes",
-//       alternateHref: "/incomes",
-//     },
+    {
+      id: 3,
+      title: "Income",
+      href: "/incomes",
+      alternateHref: "/incomes",
+    },
 //     {
 //       id: 4,
 //       title: "Unsynced Incomes",

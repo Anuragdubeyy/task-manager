@@ -12,10 +12,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`$${inter.className} `}
+        className={`$${inter.className} p-5 bg-purple-50 flex gap-4 w-full h-screen `}
       >
         <LeftBar/>
-        <main className="py-28 pl-52">{children}</main>
+        <main className="w-full  ">{children}</main>
       </body>
     </html>
   );

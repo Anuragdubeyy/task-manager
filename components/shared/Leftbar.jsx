@@ -17,12 +17,12 @@ export default function LeftBar() {
 
   return (
     <aside //style={{overflow:'hidden'}}
-      className={`w-56 h-full py-10 overflow-auto flex flex-col justify-between fixed min-w-fit px-8 bg-gray-800 shadow`}
+      className={`w-60  rounded-xl  bg-white shadow`}
     >
       <div>
         <Link
           href="/"
-          className="text-white text-2xl text-center mx-auto font-bold"
+          className="text-black h-screen text-2xl pl-10 pt-3 mx-auto  Title"
         >
         AnuVista
         </Link>
@@ -39,11 +39,11 @@ export default function LeftBar() {
                   (pathname.startsWith(link.alternateHref) &&
                     link.href != "/") ||
                   pathname === link.alternateHref + "/"
-                    ? "bg-[#46698b]"
+                    ? "bg-purple-100"
                     : ""
-                } text-white hover:bg-[#2C3E50] px-3 py-1.5 w-40 rounded cursor-pointer transition duration-300`}
+                } text-black hover:bg-purple-100 p-2 rounded cursor-pointer transition duration-300`}
               >
-                <p>{link.title}</p>
+                <p className="ml-2">{link.title}</p>
               </div>
             </Link>
           ))}
@@ -55,7 +55,7 @@ export default function LeftBar() {
         confirmButtonText="Log out"
         onConfirm={handleLogout}
       >
-        <Button className="bg-transparent hover:bg-[#2C3E50] ">
+        <Button className="bg-transparent w-48 absolute bottom-10 text-black hover:bg-purple-100 ">
           <LogOut className="mr-2" /> Log out
         </Button>
       </AlertConfirmation>
