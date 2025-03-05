@@ -34,7 +34,7 @@ mongoose
 
 app.use("/api", adminRoutes);
 app.get("/", (req, res) => {
-  res.json("welcome");
+  res.json("welcome to my AnuVista backend");
 });
 
 app.listen(5000, () => {
