@@ -1,4 +1,5 @@
 import express from "express";
+import { loginUser } from "../controller/auth/login";
 
 const router = express.Router();
 
@@ -6,5 +7,7 @@ const router = express.Router();
 router.get("/", (req, res) => {
   res.send("Admin route works!");
 });
+
+router.post("/login", loginUser);
 
 export default router;

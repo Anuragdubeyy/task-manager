@@ -1,66 +1,71 @@
-const mongoose = require("mongoose");
-const { Schema } = mongoose;
+const bcrypt = require("bcryptjs");
+const {
+  User,
+  Superadmin,
+  Admin,
+  Manager,
+  Employee,
+} = require("@/backend/models/user"); // Adjust the path based on your file structure models/user"); // Adjust the path based on your file structure
+const { generateToken, generateRefreshToken } = require("@/backend/middelware/token");
 
-// Base user schema
-const userSchema = new Schema(
-  {
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    access_token: { type: String },
-    refresh_token: { type: String },
-    registrationToken: { type: String },
-    status: {
-      type: String,
-      enum: ["Active", "Pending", "Expired"],
-      required: true,
-    },
-    role: {
-      type: String,
-      enum: ["Superadmin", "Admin", "Manager", "Employee"],
-      required: true,
-    },
-    googleId: {
-      type: String,
-    },
-    displayName:{
-      type: String,
-    },
-    google_access_token: { type: String },
-    google_refresh_token: { type: String },
 
-    team_id: { type: Schema.Types.ObjectId, ref: "Team" }, // Optional array field for Superadmin
-  },
-  { timestamps: true, strict: false } // Here is where we add { strict: false }
-);
+// Login function for version 3 (loginV3)
+const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-const User = mongoose.model("User", userSchema);
+    // Check if the user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
 
-// Discriminators
-const Superadmin = User.discriminator(
-  "Superadmin",
-  new Schema({
-    team_id: [{ type: Schema.Types.ObjectId, ref: "Team", default: [] }], // Array for Superadmin
-  })
-);
+    // Check if the account is active
+    if (user.status !== "Active") {
+      return res.status(400).json({ message: "Account is not active" });
+    }
+    if (user.registrationToken) {
+      return res.status(400).json({ message: "Account not verified" });
+    }
 
-const Admin = User.discriminator(
-  "Admin",
-  new Schema({
-    team_id: { type: Schema.Types.ObjectId, ref: "Team" }, // Single reference for Admin
-  })
-);
+    // Compare the password with the hashed password stored in the database
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
 
-const Manager = User.discriminator(
-  "Manager",
-  new Schema({
-    team_id: { type: Schema.Types.ObjectId, ref: "Team" }, // Single reference for Manager
-  })
-);
+    // Generate a JWT token
+    const access_token = generateToken(user);
+    const refresh_token = generateRefreshToken(user);
+    // Save the generated tokens in the user's record
+    user.access_token = access_token;
+    user.refresh_token = refresh_token;
+    await user.save(); // Save the user with the updated tokens
+    console.log(user); // Log the user for debugging purposes
+    // If the user is an Admin and is part of a team, update the Superadmin's team_ids
+    if (user.role === "Admin" && user.status === "Active" && user.team_id) {
+      // // Find the Superadmin in the database and Update the Superadmin's team_ids array
+      const superadmin = await Superadmin.findOne();
+      if (superadmin) {
+        // Ensure team_ids is initialized as an array
+        if (!Array.isArray(superadmin.team_id)) {
+          superadmin.team_id = [];
+        }
 
-const Employee = User.discriminator(
-  "Employee",
-  new Schema({
-    team_id: { type: Schema.Types.ObjectId, ref: "Team" }, // Single reference for Employee
-  })
-);
-module.exports = { User, Superadmin, Admin, Manager, Employee };
+        // Ensure team_id is not already in the list to avoid duplicates
+        if (!superadmin.team_id.includes(user.team_id)) {
+          superadmin.team_id.push(user.team_id);
+          await superadmin.save(); // Save the updated Superadmin record
+        }
+      }
+    }
+    // Respond with success message and user information
+    res.status(200).json({ message: "Login successful", user });
+  } catch (error) {
+    console.error(error); // Log the error for debugging purposes
+    res.status(500).json({ message: error.message }); // Return a server error response
+  }
+};
+
+// Export the login function
+module.exports = { loginUser };
